@@ -1,10 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit'
-import fileReducer from './fileSlice'
+import fileInProgressReducer from './fileInProgressSlice'
 import recordsReducer from './recordsSlice'
 
 const store = configureStore({
   reducer: {
-    file: fileReducer,
+    fileInProgress: fileInProgressReducer,
     records: recordsReducer
   }
 })

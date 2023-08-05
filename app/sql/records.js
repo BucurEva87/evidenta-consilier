@@ -1,7 +1,7 @@
 import * as SQLite from 'expo-sqlite'
 import { db } from './constants'
 
-export const createTableRecordsIfNotExists = async () => {
+export const sqlCreateTableRecordsIfNotExists = async () => {
   return new Promise((resolve, reject) => {
     db.transaction(async tx => {
       try {
@@ -9,14 +9,21 @@ export const createTableRecordsIfNotExists = async () => {
           `CREATE TABLE IF NOT EXISTS records (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             fileNumber TEXT NOT NULL UNIQUE,
-            personName TEXT NOT NULL,
-            phoneNumber TEXT NOT NULL,
-            prisonTime TEXT NOT NULL,
-            punishment TEXT NOT NULL,
+            name TEXT NOT NULL,
+            dateOfBirth INT NOT NULL,
+            emailAddress TEXT,
+            phoneNumber TEXT,
+            minorFellon INT NOT NULL,
+            educativeMeasures TEXT,
+            prisonTime TEXT,
+            punishment TEXT,
+            sentenceDate INT NOT NULL,
             probation TEXT NOT NULL,
-            expiration TEXT NOT NULL,
-            judicialObligations TEXT,
-            civilObligations TEXT
+            expiration INT NOT NULL,
+            obligations TEXT,
+            civilObligations INT NOT NULL,
+            createdAt INT NOT NULL,
+            updatedAt INT NOT NULL
           )`,
           null,
           (txObj, resultSet) => resolve({ success: true }),
@@ -29,7 +36,7 @@ export const createTableRecordsIfNotExists = async () => {
   })
 }
 
-export const readAllRecords = async () => {
+export const sqlReadAllRecords = async () => {
   return new Promise((resolve, reject) => {
     db.transaction(async tx => {
       try {
@@ -46,7 +53,7 @@ export const readAllRecords = async () => {
   })
 }
 
-export const readRecord = async (columnName, param) => {
+export const sqlReadRecord = async (columnName, param) => {
   return new Promise((resolve, reject) => {
     db.transaction(async tx => {
       try {
@@ -68,7 +75,7 @@ export const readRecord = async (columnName, param) => {
   })
 }
 
-export const readCustomQueryRecord = async (query, params) => {
+export const sqlReadCustomQueryRecord = async (query, params) => {
   return new Promise((resolve, reject) => {
     db.transaction(async tx => {
       try {
@@ -85,15 +92,16 @@ export const readCustomQueryRecord = async (query, params) => {
   })
 }
 
-export const insertRecord = async (params) => {
+export const sqlInsertRecord = async (params) => {
   return new Promise((resolve, reject) => {
     db.transaction(async tx => {
       try {
         await tx.executeSql(
           `INSERT INTO records (
-            fileNumber, personName, phoneNumber, prisonTime, punishment,
-            probation, expiration, judicialObligations, civilObligations
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            fileNumber, name, dateOfBirth, emailAddress, phoneNumber, minorFellon,
+            educativeMeasures, prisonTime, punishment, sentenceDate, probation,
+            expiration, obligations, civilObligations, createdAt, updatedAt
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           params,
           (txObj, resultSet) => resolve({ success: true, insertId: resultSet.insertId }),
           (txObj, error) => reject({ success: false, error })
@@ -105,20 +113,22 @@ export const insertRecord = async (params) => {
   })
 }
 
-export const updateRecord = async (id, columnName, param) => {
+export const sqlUpdateRecord = async (id, columnName, param) => {
   return new Promise((resolve, reject) => {
     db.transaction(async tx => {
       try {
         const allowedColumns = [
-          'fileNumber', 'personName', 'phoneNumber', 'prisonTime', 'punishment',
-          'probation', 'expiration', 'judicialObligations', 'civilObligations']
+          'fileNumber', 'name', 'dateOfBirth', 'emailAddress', 'phoneNumber', 'minorFellon',
+          'educativeMeasures', 'prisonTime', 'punishment', 'sentenceDate', 'probation', 'expiration',
+          'obligations', 'civilObligations', 'updatedAt'
+        ]
 
         if (!allowedColumns.includes(columnName))
           reject({ success: false, error: 'Column name not allowed for selection' })
 
         await tx.executeSql(
-          `UPDATE records SET ${columnName} = ? WHERE id = ?`,
-          [param, id],
+          `UPDATE records SET ${columnName} = ?, updatedAt = ? WHERE id = ?`,
+          [param, Number(new Date()), id],
           (txObj, resultSet) => resolve({ success: true }),
           (txObj, error) => reject({ success: false, error })
         )
@@ -129,7 +139,7 @@ export const updateRecord = async (id, columnName, param) => {
   })
 }
 
-export const deleteRecord = async (id) => {
+export const sqlDeleteRecord = async (id) => {
   return new Promise((resolve, reject) => {
     db.transaction(async tx => {
       try {
@@ -146,7 +156,7 @@ export const deleteRecord = async (id) => {
   })
 }
 
-export const resetTable = async () => {
+export const sqlResetTable = async () => {
   return new Promise((resolve, reject) => {
     try {
       db.transaction(async tx => {

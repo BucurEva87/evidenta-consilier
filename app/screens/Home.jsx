@@ -2,19 +2,19 @@ import React, { useEffect } from 'react'
 import { StyleSheet, Text, View, Button } from 'react-native'
 // SQL
 import {
-  createTableRecordsIfNotExists,
-  readAllRecords,
-  resetTable
+  sqlCreateTableRecordsIfNotExists,
+  sqlReadAllRecords,
+  sqlResetTable
 } from './../sql/records'
 // Redux
 import { useDispatch, useSelector } from 'react-redux'
 import { startLoading, endLoading, endLoadingWithError, insertRecord } from './../redux/recordsSlice'
+// Utils
+import { debug } from './../utils/utils'
 // Icons
 import Logo from './../../assets/logo.svg'
 // Styles
 import gStyles from './../styles/global'
-// Utils
-import { debug } from './../utils/utils'
 
 const Home = () => {
   const dispatch = useDispatch()
@@ -24,14 +24,14 @@ const Home = () => {
     const doWork = async () => {
       dispatch(startLoading())
 
-      let response = await createTableRecordsIfNotExists()
+      let response = await sqlCreateTableRecordsIfNotExists()
 
       if (!response.success) {
         debug(response.error, 'error')
         return
       }
 
-      response = await readAllRecords()
+      response = await sqlReadAllRecords()
 
       if (!response.success) {
         debug(response.error, 'error')
@@ -45,7 +45,7 @@ const Home = () => {
 
       dispatch(endLoading())
 
-      console.log(response.data)
+      // console.log(response.data)
     }
 
     doWork()
@@ -76,7 +76,7 @@ const Home = () => {
       />
       <Text>Numar dosare: {records.data.length}</Text>
       <Button title="Reset Table" onPress={async () => {
-        const response = await resetTable()
+        const response = await sqlResetTable()
 
         response.success ? debug('Table has been dropped') : debug(response.error, 'error')
       }} />

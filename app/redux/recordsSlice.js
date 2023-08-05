@@ -25,6 +25,9 @@ export const recordsSlice = createSlice({
     insertRecord: (state, action) => {
       const record = action.payload
 
+      if (state.data.find(entry => entry.fileNumber === record.fileNumber))
+        return state
+
       state.data.push(record)
     },
     updateRecord: (state, action) => {
